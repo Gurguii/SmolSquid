@@ -50,6 +50,9 @@ esac
 for i in ${mountpoints[@]}; do
   if [[ ! -e "$i" || ! -d "$i" ]]; then
     exec_command "mkdir -p "$i""
+    exec_command "chown -R gurgui:docker "$i""
+    exec_command "chmod -R g+rw "$i""
+    sleep 3
   fi
 done
 

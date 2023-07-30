@@ -50,3 +50,9 @@ Listen port: 3300
 Container ID: f56a446a0a8050c7c6473bd6ccd5c4178f97871f32a7ac459a461ee1eaea7f7e
 Date: 30-07-2023
 ====================
+Image name: gproxy:v0.1
+Docker name: gtest
+Listen port: 3300
+Container ID: dcd0af69d1cd05f02fd383e60a2128712d012f271157f4a1a74319c414b89213
+Date: 30-07-2023
+====================
