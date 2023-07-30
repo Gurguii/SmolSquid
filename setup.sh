@@ -79,7 +79,7 @@ if (( $create_docker )); then
     -v "$config_file":/etc/squid/squid.conf \
     "$image_name")"
     if [ $? -eq 0 ]; then
-      customdate=$(date '+%d-%m-%Y at %M:%H')
+      customdate=$(date '+%d-%m-%Y at %H:%M')
       printf "Image name: %s\nDocker name: %s\nListen port: %s\nContainer ID: %s\nDate: %s\n====================\n" "$image_name" "$container_name" "$squid_listen_port" "$docker_id" "$customdate" | tee -a .setup.logs
     fi
 fi
