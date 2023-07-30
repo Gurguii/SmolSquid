@@ -3,8 +3,6 @@
 # Use latest available alpine docker version
 FROM alpine:latest
 
-ARG LPORT=3128
-
 # Update the system repositories and add squid (proxy)
 RUN apk upgrade && apk upgrade && \
     apk add squid 
@@ -15,15 +13,9 @@ COPY entrypoint.sh /usr/sbin/entrypoint
 # Make the entrypoint script executable
 RUN chmod +x /usr/sbin/entrypoint
 
-# Copy our default squid configuration file within the server
-COPY squid.conf /etc/squid/squid.conf
-
-# Port 3128 is the one expected to be exposed (default Squid port)
-EXPOSE $LPORT
-
-# Hints for docker of volumes that will be created
-VOLUME ["/var/docker/alpinesquid/cache","/var/docker/alpinesquid/logs"]
-
+# Drop privileges
+# USER squid
+VOLUME ["/var/docker/alpinesquid/logs","/var/docker/alpinesquid/squid.conf","/var/docker/alpinesquid/cache"]
 # Entrypoint
 ENTRYPOINT ["entrypoint"]
 
