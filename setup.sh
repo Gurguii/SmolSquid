@@ -51,7 +51,7 @@ for i in ${mountpoints[@]}; do
   if [[ ! -e "$i" || ! -d "$i" ]]; then
     exec_command "mkdir -p "$i""
     exec_command "chown -R gurgui:docker "$i""
-    exec_command "chmod -R g+rw "$i""
+    exec_command "chmod -R 777 "$i""
     sleep 3
   fi
 done
@@ -79,6 +79,7 @@ if (( $create_docker )); then
     -v "$config_file":/etc/squid/squid.conf \
     "$image_name")"
     if [ $? -eq 0 ]; then
-      printf "Image name: %s\nDocker name: %s\nListen port: %s\nContainer ID: %s\nDate: %s\n====================\n" "$image_name" "$container_name" "$squid_listen_port" "$docker_id" $(date '+%d-%m-%Y') | tee -a .setup.logs
+      customdate=$(date '+%d-%m-%Y at %M:%H')
+      printf "Image name: %s\nDocker name: %s\nListen port: %s\nContainer ID: %s\nDate: %s\n====================\n" "$image_name" "$container_name" "$squid_listen_port" "$docker_id" "$customdate" | tee -a .setup.logs
     fi
 fi

@@ -16,8 +16,5 @@ sleep 3
 
 printf "== Doing extra stuff\n"
 
-# Display squid PID
-printf "Squid running with PID %i\n" $(pgrep squid)
-
 # Display access log file
 tail -f "/var/log/squid/access.log"

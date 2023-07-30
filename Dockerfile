@@ -15,7 +15,7 @@ RUN chmod +x /usr/sbin/entrypoint
 
 # Drop privileges
 # USER squid
-VOLUME ["/var/docker/alpinesquid/logs","/var/docker/alpinesquid/squid.conf","/var/docker/alpinesquid/cache"]
+
 # Entrypoint
 ENTRYPOINT ["entrypoint"]
 
