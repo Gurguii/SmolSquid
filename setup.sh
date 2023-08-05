@@ -1,5 +1,12 @@
 #!/bin/bash
 
+# Required files
+script_path="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+config_file="$script_path/.config"
+template_squid_config="$script_path/template.squid.conf"
+logs_dir="$script_path/logs"
+
+# FUNCTIONS 
 exec_command()
 {
   command="$1"
@@ -11,21 +18,30 @@ exec_command()
     printf "%s [SUCCESS]\n" "$command"
   else
     # Failure
-    printf "Command '%s' exited with status code: %i\n" "$command" "$?" 
-    exit 1
+    printf "Command '%s' failed with status code: '%i'\n" "$command" "$?" 
   fi
 }
 
-# Import vars file if existing
-varspath="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )/.setup.vars"
+# REQUIRED FILES CHECKING
+# ~ .config 
+if [ ! -e "$config_file" ]; then
+  printf "Cannot find configuration file: $config_file\n" && exit 1
+fi
+source "$config_file"
 
-if [ -e "$varspath" ]; then
-  source "$varspath"
-else
-  printf "Cannot find vars file: $varspath\n" && exit 1
+# ~ template.squid.conf
+if [[ ! -e "$template_squid_config" || ! -f "$template_squid_config" ]]; then
+  printf "Cannot locate squid template file @ %s\n" "$template_squid_config"
+  exit 1
 fi
 
-# Gurgui - setup alpine squid proxy docker
+# ~ logs(d) info.log(f) error.log(f)
+if [[ ! -e "$logs_dir" || ! -d "$logs_dir" ]]; then
+  exec_command "mkdir -p "$logs_dir""
+  exec_command "touch "$stderr_logs""
+  exec_command "touch "$stdout_logs""
+fi
+
 build_project=0
 create_docker=0
 
@@ -40,39 +56,48 @@ case "${1,,}" in
     build_project=1
     create_docker=1
     ;;
+  "rb" | "rebuild")
+    rebuild_project=1
+    ;;
   *)
     printf "Usage: %s <b|c|f|build|create|full>\n" "$0"
     exit 1
     ;;
 esac
 
-# Check that local mountpoints do exist
-for i in ${mountpoints[@]}; do
-  if [[ ! -e "$i" || ! -d "$i" ]]; then
-    exec_command "mkdir -p "$i""
-    exec_command "chown -R gurgui:docker "$i""
-    exec_command "chmod -R 777 "$i""
-    sleep 3
-  fi
-done
-
-# Check that squid.conf file exists
-if [[ ! -e "$config_file" || ! -f "$config_file" ]]; then
-  printf "Cannot locate config file @ %s\n" "$config_file"
-  exit 1
-fi
-
 # Build the image if user asked for it
 if (( $build_project )); then
   printf "== Building image ==\n"
-	docker buildx build -t "$image_name" .
+  # Build command
+  local command=""
+  # Check if buildx is available
+  docker buildx &>/dev/null
+  if [ $? -ne 0 ]; then
+    printf "WARNING - Plugin 'buildx' not found, proceeding building the image with deprecated 'docker build'...\n"
+    command="docker build -t "$image_name" ."
+  else
+    command="docker buildx build -t "$image_name" ."
+  fi
+  # The idea is to make the user able to add parameters to the build command (some)
+  $command
 fi
 
 # Create the docker if user asked for it
 if (( $create_docker )); then
-  # Set listening port from the `.setup.vars` file in the configuration file
-  sed -i "s/^http_port [0-9]\+$/http_port $squid_listen_port/" "$config_file"
+  # Set listening port from the `.config` file in the configuration file
+  sed "s/^http_port [0-9]\+$/http_port $squid_listen_port/" "$template_squid_config"
   printf "== Creating Docker ==\n"
+
+  # Check that local mountpoints do exist
+  for i in ${mountpoints[@]}; do
+    if [[ ! -e "$i" || ! -d "$i" ]]; then
+      exec_command "mkdir -p "$i""
+      exec_command "chown -R gurgui:docker "$i""
+      # THIS IS SUPER INSECURE
+      exec_command "chmod -R 777 "$i""
+    fi
+  done
+  
   docker_id="$(docker run --name "$container_name" -p $squid_listen_port:$squid_listen_port -itd \
 		-v "$cache_dir":/var/cache/squid \
 		-v "$log_dir":/var/log/squid \
