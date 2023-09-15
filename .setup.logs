@@ -1,0 +1,48 @@
+
+====================
+Image name: gproxy:v0.1
+Docker name: gtest
+Listen port: 3128
+Container ID: 8a95267a339cd541f7478c3093baf4f6bff1d2040cb9ee5fd7fd4e6127905b69
+[ Mountpoints ]
+cache directory: /var/docker/alpinesquid/cache
+log directory: /var/docker/alpinesquid/logs
+squid configuration file: /var/docker/alpinesquid/squid.conf
+Date: 15-09-2023 at 19:14
+====================
+
+====================
+Image name: gproxy:v0.1
+Docker name: gtest
+Listen port: 3128
+Container ID: 9d45e6f9079c209485c527e8eb25b90a49eb1f85c6d9801e802c4137a4245e46
+[ Mountpoints ]
+cache directory: /var/docker/alpinesquid/cache
+log directory: /var/docker/alpinesquid/logs
+squid configuration file: /var/docker/alpinesquid/squid.conf
+Date: 15-09-2023 at 19:39
+====================
+
+====================
+Image name: gproxy:v0.1
+Docker name: gtest
+Listen port: 3128
+Container ID: ab47d9b44e2624b9e26aaaa330bf37649b636ade8d1314cc2a9fad0a7b6b48e0
+[ Mountpoints ]
+cache directory: /var/docker/alpinesquid/cache
+log directory: /var/docker/alpinesquid/logs
+squid configuration file: /var/docker/alpinesquid/squid.conf
+Date: 15-09-2023 at 19:40
+====================
+
+====================
+Image name: gproxy:v0.1
+Docker name: gtest
+Listen port: 3128
+Container ID: 7e7c0c1eba2822961e12054c1a0695648939bd25a6481e042db71047e33c5ede
+[ Mountpoints ]
+cache directory: /var/docker/alpinesquid/cache
+log directory: /var/docker/alpinesquid/logs
+squid configuration file: /var/docker/alpinesquid/squid.conf
+Date: 15-09-2023 at 19:41
+====================
