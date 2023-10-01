@@ -3,6 +3,8 @@
 # Gurgui custom entrypoint script to
 # automatise squid in alpine docker container
 
+watch_file="/var/log/squid/access.log"
+
 # Re/create swap directories
 printf "== Creating swap directories\n" && squid -z &> /dev/null  
 
@@ -15,6 +17,6 @@ squid &>/dev/null
 sleep 3 
 
 printf "== Doing extra stuff\n"
-tail -f /etc/passwd
+
 # Display access log file
-#tail -f "/var/log/squid/access.log"
+tail -f "$watch_file"

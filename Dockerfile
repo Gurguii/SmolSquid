@@ -5,7 +5,7 @@ FROM alpine:latest
 
 # Update the system repositories and add squid (proxy)
 RUN apk upgrade && apk upgrade && \
-    apk add squid 
+    apk add squid
 
 # Copy custom entry point script 
 COPY entrypoint.sh /usr/sbin/entrypoint
@@ -16,11 +16,7 @@ RUN chmod +x /usr/sbin/entrypoint
 # Make user 'squid' the owner of necessary files
 RUN chown squid /usr/sbin/entrypoint
 
-RUN chown --recursive squid:squid /var/log/ \
-    && chown --recursive squid:squid /var/cache/ \
-    && chown --recursive squid:squid /etc/squid/
-
-RUN chown --recursive squid:squid /var/run/
+RUN chown --recursive squid:root  /var/run/
 
 # Drop privileges
 USER squid
