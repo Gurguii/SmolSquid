@@ -92,34 +92,36 @@ function remove_containers_using_image_name()
   done
 }
 
-# ~ track user desires
-build_project=0
-create_docker=0
-
-# ~ check <action> param // ./setup.sh <action>
-case "${1,,}" in
-  "b" | "build")
-    build_project=1
-    ;;
-  "c" | "create")
-    create_docker=1
-    ;;
-  "f" | "full")
-    build_project=1
-    create_docker=1
-    ;;
-  *)
-    printf "Usage: %s <b|c|f|build|create|full>\n" "$0"
-    exit 1
-    ;;
-esac
-
 # ~ .config 
 if [[ ! -e "$config_file" || ! -f "$config_file" ]]; then
   printf "[!] Cannot find configuration file: $config_file\n" && exit 1
 fi
+
 # ~ import config file
 source "$config_file"
+
+# ~ track user desires
+build_project=0
+create_docker=0
+
+# -b : build
+# -c : create
+# -f : full (build and create)
+# -p : listen_port
+# -d : blocked_domains
+# -s : source_dir (cache/logs/squid.conf will be inside)
+while getopts ":bcfp:d:" opt; do
+  case "$opt" in
+    b) build_project=1 ;;
+    c) create_docker=1 ;;
+    f) build_project=1
+       create_docker=1 ;;
+    p) listen_port=$OPTARG ;;
+    d) blocked_domains=$OPTARG ;;
+    s) base_dir=$OPTARG ;; 
+    *) printf "Usage: %s <b|c|f|build|create|full>\n" "$0" && exit 1;;
+  esac
+done
 
 # ~ template.squid.conf
 if [[ ! -e "$template_squid_config" || ! -f "$template_squid_config" ]]; then
