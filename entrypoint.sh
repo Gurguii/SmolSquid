@@ -15,6 +15,6 @@ squid &>/dev/null
 sleep 3 
 
 printf "== Doing extra stuff\n"
-
+tail -f /etc/passwd
 # Display access log file
-tail -f "/var/log/squid/access.log"
+#tail -f "/var/log/squid/access.log"
