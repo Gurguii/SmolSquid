@@ -29,6 +29,41 @@ fi
 # Write start of installation to logs/installation.log
 
 # FUNCTIONS 
+function help()
+{
+  cat << EOF
+
+$(printcyan "=====================================\n==  Gurgui smolsquid setup script  ==\n=====================================")
+
+$(printmagenta "Basic example" )
+$0 --full --port 9001 --dir /var/mydockers/smolsquid
+
+$(printmagenta "Options" )
+-h | --help   : display this help and exit 
+
+$(printyellow "Action - " ) $(printred "mandatory to use 1 of these" )
+-b | --build  : build the image 
+-c | --create : create docker using the image
+-f | --full   : build image and create docker
+
+$(printyellow "Image options" )
+-in | --image-name : set image name, default 'gproxy:v0.1'
+
+$(printyellow "Container options" )
+-p | --port   : change listen port, default 3128
+-d | --dir    : change source dir - where docker files/mountpoints will be created
+-bd | --blocked-domains : change blocked domains, default can be found at '.config'
+-cn | --container-name : set container name, default 'gtest'
+
+EOF
+  exit 1
+}
+
+function printred()
+{
+  printf "\e[91m$@\e[0m"
+}
+
 function printgreen()
 {
   printf "\e[92m$@\e[0m"
@@ -104,24 +139,37 @@ source "$config_file"
 build_project=0
 create_docker=0
 
-# -b : build
-# -c : create
-# -f : full (build and create)
-# -p : listen_port
-# -d : blocked_domains
-# -s : source_dir (cache/logs/squid.conf will be inside)
-while getopts ":bcfp:d:" opt; do
-  case "$opt" in
-    b) build_project=1 ;;
-    c) create_docker=1 ;;
-    f) build_project=1
-       create_docker=1 ;;
-    p) listen_port=$OPTARG ;;
-    d) blocked_domains=$OPTARG ;;
-    s) base_dir=$OPTARG ;; 
-    *) printf "Usage: %s <b|c|f|build|create|full>\n" "$0" && exit 1;;
+# gurguiparser 
+argc=$#
+args=($@)
+
+for (( i=0;i<argc; )); do
+  opt=${args[i]}
+  case "${opt,,}" in
+    "-h" | "--help") help ;;
+    "-b" | "--build") build_project=1 ;;
+    "-c" | "--create") create_docker=1 ;;
+    "-f" | "--full") build_project=1;create_docker=1 ;;
+    "-p" | "--port") squid_listen_port=${args[++i]} ;;
+    "-bd" | "--blocked-domains") blocked_domains=${args[++i]} ;;
+    "-d" | "--dir") base_dir=${args[++i]} ;;
+    "-in" | "--image-name") image_name="${args[++i]}" ;;
+    "-cn" | "--container-name") container_name="${args[++i]}" ;; 
+    *) printred "option '$opt' does not exist\n"; wrong_opt=1 ;;
   esac
+  (( ++i ))
 done
+
+# ~ I did this so that the user know every invalid option in their call
+# so they can remove/add everything required at once instead of going 1 by 1
+if (( $wrong_opt )); then
+  exit 1
+fi
+
+# ~ Action is mandatory ( --build --create or --full)
+if ! (( build_project || create_docker )); then
+  help
+fi
 
 # ~ template.squid.conf
 if [[ ! -e "$template_squid_config" || ! -f "$template_squid_config" ]]; then
@@ -129,7 +177,7 @@ if [[ ! -e "$template_squid_config" || ! -f "$template_squid_config" ]]; then
   exit 1
 fi
 
-# check that docker is installed
+# ~ check that docker is installed
 if ! command -v docker &>/dev/null; then 
   printf "[!] Please install docker to continue\n"
   exit 1
@@ -172,7 +220,11 @@ if (( $build_project )); then
     command="docker buildx build -t "$image_name" ."
   fi
   # The idea is to make the user able to add parameters to the build command (some)
-  $command
+  printf "%s\n" "$command"
+  $command 1>>$stdout_logs 2>>$stderr_logs
+  if [ $? -ne 0 ]; then
+    printred "[!] There was some error\n"
+  fi
 fi
 
 # Create the docker if user asked for it
@@ -205,14 +257,13 @@ if (( $create_docker )); then
 	  exec_command "chown --recursive 31:root "$i""
 	done
   
-  # TODO: add getopts after sourcing .config file to overrid any param if use requested
-  # @note add it right after sourcing, not now that there might be some variables already used
-
   # Mold template squid.conf file and save it to local mountpoint path
-  
+ 
+  # TODO - make this with a script file with each substitution required (1 per line) and use -f <script_file>
   # Set listening port from the `.config` file in the configuration file and save it to proper path 
-	sed "s/^http_port [0-9]\+$/http_port $squid_listen_port/" "$template_squid_config" \
-	| sed "s/GURGUI_DEFAULT_BLOCKED_DOMAINS/$blocked_domains/" > "$squid_config_file"
+
+  sed -r "s/^http_port [0-9]{3,4}$/http_port $squid_listen_port/" "$template_squid_config" \
+  | sed "s/GURGUI_DEFAULT_BLOCKED_DOMAINS/$(echo $blocked_domains | tr "," " ")/" > "$squid_config_file" 
 
 	docker_id="$(docker run --name "$container_name" -p $squid_listen_port:$squid_listen_port -itd \
 		-v "$cache_dir":/var/cache/squid \

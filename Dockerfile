@@ -14,9 +14,8 @@ COPY entrypoint.sh /usr/sbin/entrypoint
 RUN chmod +x /usr/sbin/entrypoint
 
 # Make user 'squid' the owner of necessary files
-RUN chown squid /usr/sbin/entrypoint
 
-RUN chown --recursive squid:root  /var/run/
+RUN chown --recursive squid:root  /usr/sbin/entrypoint /var/run/
 
 # Drop privileges
 USER squid
