@@ -19,11 +19,11 @@ stdout_logs="$logs_dir/setup.log"
 
 # Log files 
 if [[ ! -e "$logs_dir" || ! -d "$logs_dir" ]]; then
-  exec_command "mkdir -p "$logs_dir""
-  exec_command "touch "$stderr_logs""
-  exec_command "chmod +r "$stderr_logs""
-  exec_command "touch "$stdout_logs""
-  exec_command "chmod +r "$stdout_logs""
+  mkdir -p "$logs_dir"
+  touch "$stderr_logs"
+  chmod +r "$stderr_logs"
+  touch "$stdout_logs"
+  chmod +r "$stdout_logs"
 fi
 
 # Write start of installation to logs/installation.log
