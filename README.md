@@ -24,7 +24,7 @@ setup.sh --full --port 9001 --dir /var/mydockers/smolsquid
 
 
 ## Building image + docker  
-![smolsquid_full_cloneinstallation](https://github.com/Gurguii/SmolSquid/assets/101645735/8c1c968b-7892-473b-84ec-94ceb528ccfb)
+![smolsquid_full_cloneinstallation](https://github.com/Gurguii/SmolSquid/assets/101645735/5ac5b2f5-39cc-4d09-a756-5b9d94f571b8)
 
    
 ## Testing proxy requests
