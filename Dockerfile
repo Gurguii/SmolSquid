@@ -1,4 +1,4 @@
-# Gurgui
+# Airán 'Gurgui' Gómez de Salazar Eugenio
 
 # Use latest available alpine docker version
 FROM alpine:latest
